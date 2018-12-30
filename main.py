@@ -49,14 +49,14 @@ def primes_up_to(p):
 
     prime_list = [2]
     p_half = p**0.5
-    flags = [True, True] + [False] * (p-2)
+    flags = [True, True] + [False] * (p-1)
 
-    # Step through all the odd numbers
-    for i in range(3, p, 2):
+    # Just checks odd numbers
+    for i in range(3, p+1, 2):
         if flags[i]:
             continue
         prime_list.append(i)
-        # Exclude further multiples of the current prime number
+        # Excludes multiples of the prime
         if i <= p_half:
             for j in range(i*i, p, i<<1):
                 flags[j] = True
@@ -65,9 +65,12 @@ def primes_up_to(p):
 
 
 def is_instruction(instruction):
-    '''Check for a valid instruction (True/False)'''
+    '''Check for a valid instruction.
+    Returns false if it is not a valid instruction, a list with the referenced
+    states if it is'''
     prime_factors = prime_factorization(instruction)
     possible_primes = [2, 3, 5, 7]
+    referenced_states = []
 
     if [x for x in prime_factors.keys() if x not in possible_primes]:
         return False  # wrong instruction (primes not in possibleprimes)
@@ -75,42 +78,73 @@ def is_instruction(instruction):
     if 2 not in prime_factors.keys():
         return False  # 2 must always be a factor for any instruction
 
+    if 5 not in prime_factors.keys():
+        referenced_states.append(0)
+    else:
+        referenced_states.append(prime_factors.get(5))
+
     if 3 in prime_factors.keys():
         if prime_factors.get(3) != 1:
             return False  # wrong exponent (0 for addition, 1 for substraction)
 
-    return True
+        if 7 not in prime_factors.keys():
+            referenced_states.append(0)
+        else:
+            referenced_states.append(prime_factors.get(7))
+    elif 7 in prime_factors.keys():
+        return False  # 7 can't be a factor in addition
+
+    return referenced_states
 
 
 def u(n):
     """
-    To see if n encodes a program. We have to check if:
+    To see if n encodes a program, we have to check if:
     1- n = 2^i(1)*3^i(2)*...*p(r-1)^i(r)
     2- Each i(t) = 2^j*5^k OR i(t) = 2^j*3*5^k*7^l
 
     This translate into checking for the following:
     1- A instruction can only have 2, 3, 5 and 7 as prime factors (done)
     2- A instruction must have 2 as prime factor (done)
-    3- A 3 in a instruction must be either to the power 0 or 1 (done)
-    4- A instruction must not reference a non existent state (todo)
-    5- There must be a valid instruction for each prime up to the biggest one (done through checking every prime is there up to the biggest one and there is a valid instruction for each)
+    3- 3 in a instruction must be either to the power 0 or 1 (done)
+    4- A instruction must not reference a non existent state (done)
+    5- There must be a valid instruction for each referenced state (done)
     """
     prime_descomposition = prime_factorization(n)
     prime_factors = list(prime_descomposition.keys())
-    primes_to_look = primes_up_to(prime_factors[-1])
+    primes_indexed = primes_up_to(prime_factors[-1])
+    states = {0 : [0]}
 
-    for p in primes_to_look:
+    for i in range(0, len(primes_indexed)):
+        p = primes_indexed[i]
         if p not in prime_factors:
-            return 'Prime '+nstr(p, 100)+' is not a factor (biggest prime: '+nstr(prime_factors[-1], 100)+')'  # This can go away if condition 5 is not needed
+            states[i+1] = False
+            continue
 
         exponent = prime_descomposition.get(p)
 
-        if not is_instruction(exponent):
-            return 'Instruction '+nstr(p, 100)+' unclear'
+        states[i+1] = is_instruction(exponent)
 
-    return
+    for state in states.keys():
+        if not states.get(state):
+            continue
 
-# primes = prime_factorization(fmul(power(2, 300), power(3, 10)))
-# print(primes, list(primes.keys()), primes.values())
-# print(u(fmul(power(2, 300), power(3, 10))))
-# print(primes_up_to(mpf('100')))
+        for s in states.get(state):
+            if s not in states.keys():
+                return 'State '+str(s)+' does not exist, accessed from '+str(state)
+            elif not states.get(s):
+                return 'State '+str(s)+' is not valid, accessed from '+str(state)
+
+    return True
+
+
+# For the examples, we are using the next program:
+# (2, -, 2, 0) S1
+# (1, +, 1)    S2
+# On each error, we either add a third state or modify a existent one
+
+# print(u(fmul(power(2, 300), power(3, 10))))  # Works with everything well defined
+# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 10))))  # Works with a non accessible, well defined state
+# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 7))))  # Works with a non accessible, bad defined state
+# print(u(fmul(power(2, 300), power(3, 250))))  # Fails on non existant state
+# print(u(fmul(power(2, 300), power(3, 7))))  # Fails on non valid state
