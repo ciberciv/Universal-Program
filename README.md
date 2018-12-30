@@ -14,5 +14,12 @@ DONE:
 CD;PW (Could Do; Probably Won't):
 - Implement a better prime factorization algorithm
 
-Why don't do those things?
-Because time gets in the way. Maybe one day I'll do it, but probably not for presentation day
+F.A.Q.:
+- What is a encoded program?
+A number encodes a program if it can be factored into primes and the exponent of each of those primes encodes a instruction.
+
+- What is a encoded instruction?
+A number encodes a instruction if it can be factored into either 2^i*5^j or 2^i*3*5^j*7^l, where i is the index of a register (a natural number) and j and l are the index of a state (0 or natural). The first kind encodes addition, the second one encodes substraction.
+
+- Why don't do things listed in CD;PW?
+Because time, as opposite to the number of registers of a Minsky machine, is finite. Maybe one day I'll do it, but probably not for presentation day.
