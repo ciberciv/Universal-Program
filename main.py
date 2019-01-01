@@ -2,6 +2,9 @@ from mpmath import *
 from collections import Counter, OrderedDict
 
 
+mp.dps = 1000
+
+
 class OrderedCounter(Counter, OrderedDict):
     """Counter that remembers the order elements are first seen"""
 
@@ -20,21 +23,21 @@ class Instruction:
         self.referenced_states = referenced_states
 
     def __repr__(self):
+        return 'Instruction(%s, %s, %s)' % (self.referenced_register, self.substraction, self.referenced_states)
+
+    def __str__(self):
         operation = '+'
-        if substraction:
+        if self.substraction:
             operation = '-'
 
         states_string = ''
-        for s in referenced_states:
+        for s in self.referenced_states:
             states_string += ', '+str(s)
 
-        return '('+str(referenced_register)+', '+operation+states_string+')'
+        return '('+str(self.referenced_register)+', '+operation+states_string+')'
 
     def instruction_0():
         return Instruction(0, False, [0])
-
-
-mp.dps = 1000
 
 
 def prime_factorization(n):
