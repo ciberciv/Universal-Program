@@ -1,10 +1,9 @@
 from mpmath import *
-from itertools import groupby
 from collections import Counter, OrderedDict
 
 
 class OrderedCounter(Counter, OrderedDict):
-    'Counter that remembers the order elements are first seen'
+    """Counter that remembers the order elements are first seen"""
 
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, OrderedDict(self))
@@ -17,7 +16,7 @@ mp.dps = 1000
 
 
 def prime_factorization(n):
-    '''Returns an ordered dictionary with keys the prime factors and values their exponent'''
+    """Returns an ordered dictionary with keys the prime factors and values their exponent"""
 
     n = mpf(n)
     prime_factors = []
@@ -44,7 +43,7 @@ def prime_factorization(n):
 
 
 def primes_up_to(p):
-    '''Generates prime numbers up to p (sieve of Eratosthenes)'''
+    """Generates prime numbers up to p (sieve of Eratosthenes)"""
     p = int(float(nstr(p)))
 
     prime_list = [2]
@@ -58,16 +57,16 @@ def primes_up_to(p):
         prime_list.append(i)
         # Excludes multiples of the prime
         if i <= p_half:
-            for j in range(i*i, p, i<<1):
+            for j in range(i*i, p, i << 1):
                 flags[j] = True
 
     return prime_list
 
 
 def is_instruction(instruction):
-    '''Check for a valid instruction.
+    """Check for a valid instruction.
     Returns false if it is not a valid instruction, a list with the referenced
-    states if it is'''
+    states if it is"""
     prime_factors = prime_factorization(instruction)
     possible_primes = [2, 3, 5, 7]
     referenced_states = []
@@ -97,7 +96,7 @@ def is_instruction(instruction):
     return referenced_states
 
 
-def u(n):
+def u(n, k, m):
     """
     To see if n encodes a program, we have to check if:
     1- n = 2^i(1)*3^i(2)*...*p(r-1)^i(r)
@@ -113,7 +112,7 @@ def u(n):
     prime_descomposition = prime_factorization(n)
     prime_factors = list(prime_descomposition.keys())
     primes_indexed = primes_up_to(prime_factors[-1])
-    states = {0 : [0]}
+    states = {0: [0]}
 
     for i in range(0, len(primes_indexed)):
         p = primes_indexed[i]
@@ -135,6 +134,39 @@ def u(n):
             elif not states.get(s):
                 return 'State '+str(s)+' is not valid, accessed from '+str(state)
 
+    '''
+    An encoded k-uple is a product of the first k prime numbers (except for 2, which
+    we'll consider the 0-th prime number for the sake of notation) where the
+    exponent of the i-th prime represents the value on the register Ri.
+
+    That said, getting the exponents for the first k prime numbers should just
+    check the following:
+    1- The factorization can't contain a prime past the k-th prime number
+    2- If a prime before the k-th prime number is not present in the factorization,
+        that means the corresponding register is set to 0
+    '''
+    prime_descomposition = prime_factorization(m)
+    prime_factors = list(prime_descomposition.keys())
+    primes_indexed = primes_up_to(prime_factors[-1])
+    primes_indexed.remove(2)
+    registers = {}
+
+    if 2 in prime_factors:
+        return '2 cannot be a factor in the descomposition for the '+str(k)+'-uple'
+
+    if len(primes_indexed) > k:  # Checks for condition 1
+        return 'More than '+str(k)+' registers represented in the '+str(k)+'-uple'
+
+    for i in range(0, len(primes_indexed)):  # Includes all up to the biggest one that appears in the factorization
+        p = primes_indexed[i]
+        if p not in prime_factors:
+            registers[i+1] = 0
+        else:
+            registers[i+1] = prime_descomposition.get(p)
+
+    for i in range(len(primes_indexed), k):  # Sets to 0 the registers past the bigest one in the factorization (if any)
+        registers[i+1] = 0
+
     return True
 
 
@@ -143,8 +175,15 @@ def u(n):
 # (1, +, 1)    S2
 # On each error, we either add a third state or modify a existent one
 
-# print(u(fmul(power(2, 300), power(3, 10))))  # Works with everything well defined
-# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 10))))  # Works with a non accessible, well defined state
-# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 7))))  # Works with a non accessible, bad defined state
-# print(u(fmul(power(2, 300), power(3, 250))))  # Fails on non existant state
-# print(u(fmul(power(2, 300), power(3, 7))))  # Fails on non valid state
+# Work:
+# print(u(fmul(power(2, 300), power(3, 10)), 2, power(5, 2)))  # Works with everything well defined
+# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 10)), 2, power(5, 2)))  # Works with a non accessible, well defined state
+# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 7)), 2, power(5, 2)))  # Works with a non accessible, bad defined state
+
+# Fail on the encoded program:
+# print(u(fmul(power(2, 300), power(3, 250)), 2, power(5, 2)))  # Fails on non existant state
+# print(u(fmul(power(2, 300), power(3, 7)), 2, power(5, 2)))  # Fails on non valid state
+
+#Fail on the encoded k-uple:
+# print(u(fmul(power(2, 300), power(3, 10)), 2, fmul(power(2, 7), power(5, 2))))  # Fails on 2 as a factor encoding the k-uple
+# print(u(fmul(power(2, 300), power(3, 10)), 2, fmul(power(5, 2), power(7, 4))))  # Fails on more than k registers
