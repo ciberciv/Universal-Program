@@ -36,9 +36,6 @@ class Instruction:
 
         return '('+str(self.referenced_register)+', '+operation+states_string+')'
 
-    def instruction_0():
-        return Instruction(0, False, [0])
-
 
 def prime_factorization(n):
     """Returns an ordered dictionary with keys the prime factors and values their exponent"""
@@ -62,27 +59,33 @@ def prime_factorization(n):
     if n != 1:
         prime_factors.append(n)
 
-    factorization = OrderedCounter(prime_factors)
+    factorization = {}
+
+    for p in prime_factors:
+        if not factorization.get(p):
+            factorization[p] = mpf(1)
+        else:
+            factorization[p] = factorization[p] + 1
 
     return factorization
 
 
 def primes_up_to(p):
     """Generates prime numbers up to p (sieve of Eratosthenes)"""
-    p = int(float(nstr(p)))
+    last = int(float(nstr(p)))
 
-    prime_list = [2]
-    p_half = p**0.5
-    flags = [True, True] + [False] * (p-1)
+    prime_list = [mpf(2)]
+    p_half = power(p, 0.5)
+    flags = [True, True] + [False] * (last-1)
 
     # Just checks odd numbers
-    for i in range(3, p+1, 2):
+    for i in range(3, last+1, 2):
         if flags[i]:
             continue
-        prime_list.append(i)
+        prime_list.append(mpf(i))
         # Excludes multiples of the prime
         if i <= p_half:
-            for j in range(i*i, p, i << 1):
+            for j in range(i*i, last, i << 1):
                 flags[j] = True
 
     return prime_list
@@ -143,7 +146,7 @@ def u(n, k, m):
     prime_descomposition = prime_factorization(n)
     prime_factors = list(prime_descomposition.keys())
     primes_indexed = primes_up_to(prime_factors[-1])
-    states = {0: Instruction.instruction_0()}
+    states = {0: Instruction(0, False, [0])}
 
     for i in range(0, len(primes_indexed)):
         p = primes_indexed[i]
@@ -238,6 +241,8 @@ def u(n, k, m):
 
     return registers
 
+
+print(is_instruction(fmul(2, 5)))
 
 # For the examples, we are using the next program:
 # (2, -, 2, 0) S1
