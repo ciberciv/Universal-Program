@@ -146,17 +146,17 @@ def u(n, k, m):
     prime_descomposition = prime_factorization(n)
     prime_factors = list(prime_descomposition.keys())
     primes_indexed = primes_up_to(prime_factors[-1])
-    states = {0: Instruction(0, False, [0])}
+    states = {mpf(0): Instruction(mpf(0), False, [mpf(0)])}
 
     for i in range(0, len(primes_indexed)):
         p = primes_indexed[i]
         if p not in prime_factors:
-            states[i+1] = False
+            states[mpf(i+1)] = False
             continue
 
         exponent = prime_descomposition.get(p)
 
-        states[i+1] = is_instruction(exponent)
+        states[mpf(i+1)] = is_instruction(exponent)
 
     for state in states.keys():
         if not states.get(state):
@@ -195,13 +195,14 @@ def u(n, k, m):
 
     for i in range(0, len(primes_indexed)):  # Includes all up to the biggest one that appears in the factorization
         p = primes_indexed[i]
+
         if p not in prime_factors:
-            registers[i+1] = 0
+            registers[mpf(i+1)] = mpf(0)
         else:
-            registers[i+1] = prime_descomposition.get(p)
+            registers[mpf(i+1)] = prime_descomposition.get(p)
 
     for i in range(len(primes_indexed), k):  # Sets to 0 the registers past the bigest one in the factorization (if any)
-        registers[i+1] = 0
+        registers[mpf(i+1)] = mpf(0)
 
     '''
     Now that we know everything can execute, we do it. To do so, we run a while
@@ -217,7 +218,7 @@ def u(n, k, m):
     The program returns the last state of the registers, although it should return
     the value in register 1, just to make sure a program does what it should.
     '''
-    current_state = 1
+    current_state = mpf(1)
 
     while current_state != 0:
         current_instruction = states.get(current_state)
@@ -227,22 +228,20 @@ def u(n, k, m):
 
         if current_instruction.substraction:
             if not register_value or register_value == 0:
-                registers[current_register] = 0
+                registers[current_register] = mpf(0)
                 current_state = accessible_states[1]
             else:
-                registers[current_register] = register_value - 1
+                registers[current_register] = register_value - mpf(1)
                 current_state = accessible_states[0]
         else:
             if not register_value:
-                registers[current_register] = 1
+                registers[current_register] = mpf(1)
             else:
-                registers[current_register] = register_value + 1
+                registers[current_register] = register_value + mpf(1)
             current_state = accessible_states[0]
 
     return registers
 
-
-print(is_instruction(fmul(2, 5)))
 
 # For the examples, we are using the next program:
 # (2, -, 2, 0) S1

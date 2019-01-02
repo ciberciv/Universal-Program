@@ -6,13 +6,13 @@ Install: pip install mpmath
 The goal of this project is to simulate a universal program u(n, k, m), that is, given a number n that encodes a program, k the length of a k-uple and m a k-uple (m_1, ..., m_k), then u(n, k, m) = r, where r is the final computation done by the program n. If any of the premises isn't fulfilled, then u(n, k, m) is not defined (so it must return an error)
 
 TODO:
-- A version that only uses mpmath numbers
 
 DONE:
 - Check if n actually encodes a program.
 - Translation from prime to number of register/state to make it easier to read.
 - Check if m actually encodes a k-uple.
 - Run the program n with starting registers m if every condition is met.
+- A version that only uses mpmath numbers
 
 CD;PW (Could Do; Probably Won't):
 - Implement a better prime factorization algorithm
