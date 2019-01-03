@@ -2,7 +2,7 @@ from mpmath import *
 from collections import Counter, OrderedDict
 
 
-mp.dps = 1000
+mp.dps = 100000
 
 
 class OrderedCounter(Counter, OrderedDict):
@@ -35,6 +35,24 @@ class Instruction:
             states_string += ', '+str(s)
 
         return '('+str(self.referenced_register)+', '+operation+states_string+')'
+
+
+def encode_instruction(instruction):
+    register = instruction.referenced_register
+    is_substraction = instruction.substraction
+    states = instruction.referenced_states
+
+    code = power(2, register)
+
+    if is_substraction:
+        code *= mpf(3)
+
+    code *= power(5, states[0])
+
+    if len(states) == 2:
+        code *= power(7, states[1])
+
+    return code
 
 
 def prime_factorization(n):
@@ -97,7 +115,7 @@ def is_instruction(instruction):
     states if it is"""
     prime_factors = prime_factorization(instruction)
     possible_primes = [2, 3, 5, 7]
-    referenced_register = 0
+    referenced_register = mpf(0)
     is_substraction = False
     referenced_states = []
 
@@ -260,3 +278,7 @@ def u(n, k, m):
 # Fail on the encoded k-uple:
 # print(u(fmul(power(2, 300), power(3, 10)), 2, fmul(power(2, 7), power(5, 2))))  # Fails on 2 as a factor encoding the k-uple
 # print(u(fmul(power(2, 300), power(3, 10)), 2, fmul(power(5, 2), power(7, 4))))  # Fails on more than k registers
+
+
+# print(fmul(power(2, 5880), fmul(power(3, mpf('176473500')), fmul(power(5, 5000), fmul(power(7, 6250), fmul(power(11, 50), fmul(power(13, mpf('1875000')), power(17, 62500))))))))
+# print(u(fmul(power(2, 5880), fmul(power(3, mpf('176473500')), fmul(power(5, 5000), fmul(power(7, 6250), fmul(power(11, 50), fmul(power(13, mpf('1875000')), power(17, 62500))))))), 3, fmul(3, fmul(5, power(7, 3)))))
