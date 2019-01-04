@@ -2,7 +2,7 @@ from mpmath import *
 from collections import Counter, OrderedDict
 
 
-mp.dps = 100000
+mp.dps = 10000  # This needs to be a higher value for bigger programs
 
 
 class OrderedCounter(Counter, OrderedDict):
@@ -261,7 +261,7 @@ def u(n, k, m):
     return registers
 
 
-# For the examples, we are using the next program:
+# For the next examples, we will use the next program:
 # (2, -, 2, 0) S1
 # (1, +, 1)    S2
 # On each error, we either add a third state or modify a existent one
@@ -280,5 +280,16 @@ def u(n, k, m):
 # print(u(fmul(power(2, 300), power(3, 10)), 2, fmul(power(5, 2), power(7, 4))))  # Fails on more than k registers
 
 
-# print(fmul(power(2, 5880), fmul(power(3, mpf('176473500')), fmul(power(5, 5000), fmul(power(7, 6250), fmul(power(11, 50), fmul(power(13, mpf('1875000')), power(17, 62500))))))))
-# print(u(fmul(power(2, 5880), fmul(power(3, mpf('176473500')), fmul(power(5, 5000), fmul(power(7, 6250), fmul(power(11, 50), fmul(power(13, mpf('1875000')), power(17, 62500))))))), 3, fmul(3, fmul(5, power(7, 3)))))
+# The example below shows a bigger program. Things start getting real slow after 4 states:
+# (1, -, 1, 2) S1
+# (2, -, 3, 0) S2
+# (1, +, 4)    S3
+# (1, +, 2)    S4
+# This program empties R1 and adds double the content on R2 to R1
+
+# s1 = encode_instruction(Instruction(mpf(1), True, [mpf(1), mpf(2)]))
+# s2 = encode_instruction(Instruction(mpf(2), True, [mpf(3), mpf(0)]))
+# s3 = encode_instruction(Instruction(mpf(1), False, [mpf(4)]))
+# s4 = encode_instruction(Instruction(mpf(1), False, [mpf(2)]))
+
+# print(u(fprod([power(2, s1), power(3, s2), power(5, s3), power(7, s4)]), 2, fmul(power(3, 2), power(5, 2))))
