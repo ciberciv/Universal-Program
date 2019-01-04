@@ -1,18 +1,7 @@
 from mpmath import *
-from collections import Counter, OrderedDict
 
 
 mp.dps = 10000  # This needs to be a higher value for bigger programs
-
-
-class OrderedCounter(Counter, OrderedDict):
-    """Counter that remembers the order elements are first seen"""
-
-    def __repr__(self):
-        return '%s(%r)' % (self.__class__.__name__, OrderedDict(self))
-
-    def __reduce__(self):
-        return self.__class__, (OrderedDict(self),)
 
 
 class Instruction:
@@ -56,7 +45,7 @@ def encode_instruction(instruction):
 
 
 def prime_factorization(n):
-    """Returns an ordered dictionary with keys the prime factors and values their exponent"""
+    """Returns a dictionary with keys the prime factors and values their exponent"""
 
     n = mpf(n)
     prime_factors = []
@@ -80,10 +69,8 @@ def prime_factorization(n):
     factorization = {}
 
     for p in prime_factors:
-        if not factorization.get(p):
-            factorization[p] = mpf(1)
-        else:
-            factorization[p] = factorization[p] + 1
+        current_exponent = factorization.setdefault(p, mpf(0))
+        factorization[p] = factorization[p] + 1
 
     return factorization
 
@@ -211,7 +198,7 @@ def u(n, k, m):
     if len(primes_indexed) > k:  # Checks for condition 1
         return 'More than '+str(k)+' registers represented in the '+str(k)+'-uple'
 
-    for i in range(0, len(primes_indexed)):  # Includes all up to the biggest one that appears in the factorization
+    for i in range(0, len(primes_indexed)):  # Includes primes up to the biggest one that appears in the factorization
         p = primes_indexed[i]
 
         if p not in prime_factors:
@@ -241,21 +228,17 @@ def u(n, k, m):
     while current_state != 0:
         current_instruction = states.get(current_state)
         current_register = current_instruction.referenced_register
-        register_value = registers.get(current_register)
+        register_value = registers.setdefault(current_register, mpf(0))
         accessible_states = current_instruction.referenced_states
 
         if current_instruction.substraction:
-            if not register_value or register_value == 0:
-                registers[current_register] = mpf(0)
+            if not register_value:
                 current_state = accessible_states[1]
             else:
                 registers[current_register] = register_value - mpf(1)
                 current_state = accessible_states[0]
         else:
-            if not register_value:
-                registers[current_register] = mpf(1)
-            else:
-                registers[current_register] = register_value + mpf(1)
+            registers[current_register] = register_value + mpf(1)
             current_state = accessible_states[0]
 
     return registers
