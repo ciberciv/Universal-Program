@@ -5,7 +5,6 @@ mp.dps = 10000  # This needs to be a higher value for bigger programs
 
 
 class Instruction:
-    """Instruction with every element"""
     def __init__(self, referenced_register, substraction, referenced_states):
         self.referenced_register = referenced_register
         self.substraction = substraction
@@ -46,7 +45,6 @@ def encode_instruction(instruction):
 
 def prime_factorization(n):
     """Returns a dictionary with keys the prime factors and values their exponent"""
-
     n = mpf(n)
     prime_factors = []
     prime = mpf(2)
@@ -97,9 +95,8 @@ def primes_up_to(p):
 
 
 def is_instruction(instruction):
-    """Check for a valid instruction.
-    Returns false if it is not a valid instruction, a list with the referenced
-    states if it is"""
+    """Check for valid instructions. Returns false if it is not a valid instruction,
+     a list with the referenced states if it is"""
     prime_factors = prime_factorization(instruction)
     possible_primes = [2, 3, 5, 7]
     referenced_register = mpf(0)
@@ -114,10 +111,7 @@ def is_instruction(instruction):
 
     referenced_register = prime_factors.get(2)
 
-    if 5 not in prime_factors.keys():
-        referenced_states.append(0)
-    else:
-        referenced_states.append(prime_factors.get(5))
+    referenced_states.append(prime_factors.get(5, 0))
 
     if 3 in prime_factors.keys():
         if prime_factors.get(3) != 1:
@@ -125,10 +119,7 @@ def is_instruction(instruction):
 
         is_substraction = True
 
-        if 7 not in prime_factors.keys():
-            referenced_states.append(0)
-        else:
-            referenced_states.append(prime_factors.get(7))
+        referenced_states.append(prime_factors.get(7, 0))
     elif 7 in prime_factors.keys():
         return False  # 7 can't be a factor in addition
 
@@ -201,10 +192,7 @@ def u(n, k, m):
     for i in range(0, len(primes_indexed)):  # Includes primes up to the biggest one that appears in the factorization
         p = primes_indexed[i]
 
-        if p not in prime_factors:
-            registers[mpf(i+1)] = mpf(0)
-        else:
-            registers[mpf(i+1)] = prime_descomposition.get(p)
+        registers[mpf(i+1)] = prime_descomposition.get(p, mpf(0))
 
     for i in range(len(primes_indexed), k):  # Sets to 0 the registers past the bigest one in the factorization (if any)
         registers[mpf(i+1)] = mpf(0)
