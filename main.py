@@ -238,17 +238,17 @@ def u(n, k, m):
 # On each error, we either add a third state or modify a existent one
 
 # Work:
-# print(u(fmul(power(2, 300), power(3, 10)), 2, power(5, 2)))  # Works with everything well defined
-# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 10)), 2, power(5, 2)))  # Works with a non accessible, well defined state
-# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 7)), 2, power(5, 2)))  # Works with a non accessible, bad defined state
+# print(u(fmul(power(2, 300), power(3, 10)), 2, fprod([power(3, 7), power(5, 2)])))  # Works with everything well defined
+# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 10)), 2, fprod([power(3, 7), power(5, 2)])))  # Works with a non accessible, well defined state
+# print(u(fmul(fmul(power(2, 300), power(3, 10)), power(5, 7)), 2, fprod([power(3, 7), power(5, 2)])))  # Works with a non accessible, bad defined state
 
 # Fail on the encoded program:
-# print(u(fmul(power(2, 300), power(3, 250)), 2, power(5, 2)))  # Fails on non existant state
-# print(u(fmul(power(2, 300), power(3, 7)), 2, power(5, 2)))  # Fails on non valid state
+# print(u(fmul(power(2, 300), power(3, 250)), 2, fprod([power(3, 7), power(5, 2)])))  # Fails on non existant state
+# print(u(fmul(power(2, 300), power(3, 7)), 2, fprod([power(3, 7), power(5, 2)])))  # Fails on non valid state
 
 # Fail on the encoded k-uple:
-# print(u(fmul(power(2, 300), power(3, 10)), 2, fmul(power(2, 7), power(5, 2))))  # Fails on 2 as a factor encoding the k-uple
-# print(u(fmul(power(2, 300), power(3, 10)), 2, fmul(power(5, 2), power(7, 4))))  # Fails on more than k registers
+# print(u(fmul(power(2, 300), power(3, 10)), 2, fprod([power(2, 7), power(5, 2)])))  # Fails on 2 as a factor encoding the k-uple
+# print(u(fmul(power(2, 300), power(3, 10)), 2, fprod([power(5, 2), power(7, 4)])))  # Fails on more than k registers
 
 
 # The example below shows a bigger program. Things start getting real slow after 4 states:
